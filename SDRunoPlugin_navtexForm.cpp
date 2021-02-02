@@ -284,38 +284,36 @@ void	SDRunoPlugin_navtexForm::Setup() {
 	navtexAfcon. option (0);
 	navtexAfcon. events (). selected ([&] (const nana::arg_combox &ar_cbx)
 	                    {set_navtexAfcon (ar_cbx. widget. caption ());});
-//	navtexAfcon. bgcolor (nana::colors::black);
-//	navtexAfcon. fgcolor (nana::colors::white);
+	navtexAfcon. tooltip ("afc setting");
 
 	navtexReverse. push_back ("normal");
 	navtexReverse. push_back ("reverse");
 	navtexReverse. option (0);
 	navtexReverse. events (). selected ([&] (const nana::arg_combox &ar_cbx)
                             {set_navtexReverse (ar_cbx. widget. caption ());});
-//	navtexReverse. bgcolor (nana::colors::black);
-//	navtexReverse. fgcolor (nana::colors::white);
+	naxtexReverse. tooltip ("reverse means switch mark and space");
 
 	navtexFecError. push_back ("non strict");
 	navtexFecError. push_back ("strict fec");
 	navtexFecError. option (0);
 	navtexFecError. events (). selected ([&](const nana::arg_combox &ar_cbx)
                             {set_navtexFecError (ar_cbx. widget. caption ());});
-//	navtexFecError. bgcolor (nana::colors::black);
-//	navtexFecError. fgcolor (nana::colors::white);
+	navtexFecError. tooltip ("error correction setting, useful for seeing whether or not data is passing by");
 
 	navtexMessage.push_back("all text");
 	navtexMessage. push_back ("message");
 	navtexMessage. option (0);
 	navtexMessage. events (). selected ([&](const nana::arg_combox &ar_cbx)
                             {set_navtexMessage (ar_cbx. widget. caption ());});
-//	navtexMessage. bgcolor (nana::colors::black);
-//	navtexMessage. fgcolor (nana::colors::white);
+	navtexMessage. tooltip ("if message is selected ONLY valid navtex messages will be shown");
 //
 //	coloring the labels
         navtexStrength. transparent (true);
 	navtexStrength. fgcolor (nana::colors::white);
+	navtextStrength. tooltip ("strength of the signal");
         navtexCorrection. transparent (true);
         navtexCorrection. fgcolor (nana::colors::white);
+	navtexCorrection. tooltip ("correction on the selected frequency, when afc is on");
         navtexTextBox . transparent (true);
 	navtexTextBox. fgcolor (nana::colors::white);
 }
