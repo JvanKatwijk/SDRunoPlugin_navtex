@@ -291,7 +291,7 @@ void	SDRunoPlugin_navtexForm::Setup() {
 	navtexReverse. option (0);
 	navtexReverse. events (). selected ([&] (const nana::arg_combox &ar_cbx)
                             {set_navtexReverse (ar_cbx. widget. caption ());});
-	naxtexReverse. tooltip ("reverse means switch mark and space");
+	navtexReverse. tooltip ("reverse means switch mark and space");
 
 	navtexFecError. push_back ("non strict");
 	navtexFecError. push_back ("strict fec");
@@ -310,7 +310,7 @@ void	SDRunoPlugin_navtexForm::Setup() {
 //	coloring the labels
         navtexStrength. transparent (true);
 	navtexStrength. fgcolor (nana::colors::white);
-	navtextStrength. tooltip ("strength of the signal");
+	navtexStrength. tooltip ("strength of the signal");
         navtexCorrection. transparent (true);
         navtexCorrection. fgcolor (nana::colors::white);
 	navtexCorrection. tooltip ("correction on the selected frequency, when afc is on");

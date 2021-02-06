@@ -22,7 +22,8 @@
 #define sideBorderWidth (8)
 
 // TODO: Change these numbers to the height and width of your form
-#define formWidth (297)
+//#define formWidth (297)
+#define formWidth (500)
 #define formHeight (240)
 
 class SDRunoPlugin_navtexUi;
@@ -75,14 +76,14 @@ private:
 //	first the number displays
 	nana::label navtexStrength {*this, nana::rectangle (30, 110, 100, 20)};
         nana::label navtexCorrection {*this, nana::rectangle (140, 110, 100, 20)};
-        nana::label navtexTextBox  {*this, nana::rectangle (30, 140, 200, 100)};
+        nana::label navtexTextBox  {*this, nana::rectangle (30, 140, 450, 20)};
 //
 //	then the selectors
-	nana::combox navtexAfcon {*this, nana::rectangle (30, 50, 100, 20) };
-        nana::combox navtexReverse {*this, nana::rectangle (130, 50, 100, 20) };
-        nana::combox navtexFecError {*this, nana::rectangle (30, 80, 100, 20) };
-        nana::combox navtexMessage {*this, nana::rectangle (130, 80, 100, 20) };
+	nana::combox navtexAfcon {*this, nana::rectangle (30, 50, 90, 20) };
+        nana::combox navtexReverse {*this, nana::rectangle (130, 50, 90, 20) };
+        nana::combox navtexFecError {*this, nana::rectangle (230, 50, 90, 20) };
+        nana::combox navtexMessage {*this, nana::rectangle (330, 50, 90, 20) };
 
-	SDRunoPlugin_navtexUi & m_parent;
-	IUnoPluginController & m_controller;
+	SDRunoPlugin_navtexUi	& m_parent;
+	IUnoPluginController	& m_controller;
 };

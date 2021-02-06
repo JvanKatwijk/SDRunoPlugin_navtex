@@ -108,8 +108,8 @@ CharMap CCIR_476_ITA4 [34] = {
 	navtexBitclk		= 0.0;
 	navtexPhaseacc		= 0;
 	fragmentCount		= 0;
-	navtexOldz		= std::complex<float> (0, 0);
-	navtexState		= NAVTEX_X0;
+	navtexOldz		    = std::complex<float> (0, 0);
+	navtexState		    = NAVTEX_X0;
 	navtexDecimator		= 0;
 	navtexOldFragment	= 0;
 	navtexShiftReg		= 0;
@@ -119,8 +119,8 @@ CharMap CCIR_476_ITA4 [34] = {
 	navtex_clrText		();
 	navtex_showCorrection (navtexIF);
 	
-	navtexAfcon		= false;
-	showAlways		= true;
+	navtexAfcon		    = false;
+	showAlways		    = true;
 	navtexReversed		= false;;
 	navtexFecError		= false;
 	navtexTextstring	= "";
@@ -668,7 +668,7 @@ void	SDRunoPlugin_navtex::navtex_addText (char c) {
 	if (c <= ' ')
 	   c = ' ';
 	navtexTextString.push_back (c);
-	if (navtexTextString. size () > 35) {
+	if (navtexTextString. size () > 65) {
 		navtexTextString. erase (0, 1);
 	}
 	m_form. navtex_showText (navtexTextString);
