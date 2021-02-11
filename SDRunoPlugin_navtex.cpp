@@ -4,7 +4,7 @@
 #include	<vector>
 #include	<sstream>
 #include	<chrono>
-#include    <Windows.h>
+#include	<Windows.h>
 #include        <mutex>
 #include	"SDRunoPlugin_navtex.h"
 #include	"SDRunoPlugin_navtexUi.h"
@@ -99,17 +99,16 @@ CharMap CCIR_476_ITA4 [34] = {
 
 	m_controller	        = &controller;
 	running. store (false);
-
 	navtexIF	        = NAVTEX_IF;
 	navtexBitLen		= (uint16_t)(NAVTEX_RATE / NAVTEX_BAUDRATE + 0.5);
 //
 //	set everything ready
 //
-	navtexBitclk		= 0.0;
-	navtexPhaseacc		= 0;
-	fragmentCount		= 0;
-	navtexOldz		    = std::complex<float> (0, 0);
-	navtexState		    = NAVTEX_X0;
+	navtexBitclk	        = 0.0;
+	navtexPhaseacc	        = 0;
+	fragmentCount	        = 0;
+	navtexOldz	        = std::complex<float> (0, 0);
+	navtexState	        = NAVTEX_X0;
 	navtexDecimator		= 0;
 	navtexOldFragment	= 0;
 	navtexShiftReg		= 0;
@@ -118,9 +117,10 @@ CharMap CCIR_476_ITA4 [34] = {
 	CycleCount		= 0;
 	navtex_clrText		();
 	navtex_showCorrection (navtexIF);
-	
-	navtexAfcon		    = false;
-	showAlways		    = true;
+
+	dumpFilePointer		= nullptr;
+	navtexAfcon	        = false;
+	showAlways	        = true;
 	navtexReversed		= false;;
 	navtexFecError		= false;
 	navtexTextstring	= "";
@@ -167,6 +167,9 @@ CharMap CCIR_476_ITA4 [34] = {
 	SDRunoPlugin_navtex::~SDRunoPlugin_navtex () {	
 	running. store (false);
 	m_worker -> join ();
+	if (dumpFilePointer != nullptr)
+	   fclose (dumpFilePointer);
+	dumpFilePointer	= nullptr;
 	m_controller    -> UnregisterStreamProcessor (0, this);
 	m_controller    -> UnregisterAudioProcessor (0, this);
 	delete m_worker;
@@ -176,18 +179,18 @@ CharMap CCIR_476_ITA4 [34] = {
 
 
 void    SDRunoPlugin_navtex::StreamProcessorProcess (channel_t    channel,
-	                                            Complex      *buffer,
-	                                            int          length,
-	                                            bool         &modified) {
+	                                             Complex      *buffer,
+	                                             int          length,
+	                                             bool         &modified) {
 	if (running. load () && !navtexError)
 	   navtexBuffer. putDataIntoBuffer (buffer, length);
 	modified = false;
 }
 
 void    SDRunoPlugin_navtex::AudioProcessorProcess (channel_t channel,
-	                                          float* buffer,
-	                                          int length,
-	                                          bool& modified) {
+	                                            float* buffer,
+	                                            int length,
+	                                            bool& modified) {
 	if (navtexAudioBuffer.GetRingBufferReadAvailable() >= length * 2) {
 	   navtexAudioBuffer.getDataFromBuffer(buffer, length * 2);
 	   modified = true;
@@ -219,27 +222,28 @@ void	SDRunoPlugin_navtex::HandleEvent (const UnoEvent& ev) {
 
 #define	BUFFER_SIZE	4096
 void	SDRunoPlugin_navtex::WorkerFunction () {
-Complex buffer [4096];
+Complex buffer [BUFFER_SIZE];
 
 	running. store (true);
 	while (true) {
 	   while (running. load () &&
-	              (navtexBuffer. GetRingBufferReadAvailable () < BUFFER_SIZE))
+	           (navtexBuffer. GetRingBufferReadAvailable () < BUFFER_SIZE))
 	      Sleep (1);
 	   if (!running. load ())
 	      break;
+
 	   navtexBuffer. getDataFromBuffer (buffer, BUFFER_SIZE);
 	   int theOffset = centerFrequency - selectedFrequency;
+	   locker.lock ();
 	   for (int i = 0; i < BUFFER_SIZE; i++) {
 	      std::complex<float> sample =
 	                std::complex<float>(buffer [i]. real, buffer [i]. imag);
-	      locker.lock ();
 	      sample   = passbandFilter. Pass (sample);
-	      locker.unlock ();
 	      sample   = theMixer. do_shift (sample, -theOffset);
 	      if (theDecimator. Pass (sample, &sample))
 	         process (sample);
 	   }  
+	   locker.unlock ();
 	}
 
 	m_form. navtex_showText ("going down");
@@ -255,7 +259,7 @@ std::complex<float> cmul(std::complex<float> x, float y) {
 //	designed for a rate of 12000, so the last transform
 //	is a simple interpolation
 int     SDRunoPlugin_navtex::resample	(std::complex<float> in,
-	                                   std::complex<float> *out) {
+	                                 std::complex<float> *out) {
 	convBuffer [convIndex ++] = in;
 	if (convIndex >= convBuffer. size ()) {
 	   for (int i = 0; i < NAVTEX_RATE / 100; i ++) {
@@ -287,43 +291,41 @@ int     cnt;
 //	This is where it really starts, we process (decimated) sample
 //	by sample
 void	SDRunoPlugin_navtex::processSample(std::complex<float> z) {
-	float	f;
-	float	bf;
-	std::vector<std::complex<float>> tone(navtexAudioRate / NAVTEX_RATE);
+float	f;
+float	bf;
+std::vector<std::complex<float>> tone (navtexAudioRate / NAVTEX_RATE);
 
 	if (++CycleCount > NAVTEX_RATE) {
-		navtex_showStrength(navtexStrength);
-		navtex_showCorrection(navtexIF);
-		CycleCount = 0;
+	   navtex_showStrength (navtexStrength);
+	   navtex_showCorrection (navtexIF);
+	   CycleCount = 0;
 	}
 
-	//	mix the sample with the LO and filter out unwanted products
-	z = localShifter.do_shift(z, navtexIF);
-	z = LPM_Filter.Pass(z);
-	//
-	//	make a tone, such that we tune on audio
-	audioFilter->Filter(cmul(z, 20), tone.data());
+// mix the sample with the LO and filter out unwanted products
+	z = localShifter. do_shift (z, navtexIF);
+	z = LPM_Filter.Pass (z);
+//
+//	make a tone, such that we tune on audio
+	audioFilter -> Filter (cmul (z, 20), tone.data());
 	for (int i = 0; i < tone.size(); i++) {
-		tone[i] *= navtexToneBuffer[navtexTonePhase];
-		navtexTonePhase = (navtexTonePhase + 801) % navtexAudioRate;
+	   tone[i] *= navtexToneBuffer[navtexTonePhase];
+	   navtexTonePhase = (navtexTonePhase + 801) % navtexAudioRate;
 	}
 	navtexAudioBuffer.putDataIntoBuffer(tone.data(), tone.size() * 2);
 
-	float power = norm(z);
+	float power = norm (z);
 	navtexStrength = power > 0 ? 20 * log10((power + 0.1) / 2048) : 0;
-	/*
-	 *	slice and average
-	 */
-	f = arg(z * conj(navtexOldz)) * NAVTEX_RATE / (2 * M_PI);
+//	lice and average
+	f = arg (z * conj (navtexOldz)) * NAVTEX_RATE / (2 * M_PI);
 	navtexOldz = z;
 	f = navtexFilter.filter(f);
 	bf = navtexReversed ? (f < 0.0) : (f > 0.0);
 
 	if (++navtexDecimator >= navtexBitLen / 10) {
-		addbitfragment(bf ? 1 : 0);
-		if (navtexAfcon)
-			navtexIF += correctIF(f);
-		navtexDecimator = 0;
+	   addbitfragment (bf ? 1 : 0);
+	   if (navtexAfcon)
+	      navtexIF += correctIF(f);
+	   navtexDecimator = 0;
 	}
 }
 
@@ -416,8 +418,8 @@ void	SDRunoPlugin_navtex::decoder (int val) {
 	   case NAVTEX_X1:		/* waiting for Beta or data	*/
 	      if (val == NAVTEX_BETA)
 	         navtexState = NAVTEX_X2;
-	      else
-	      {  initMessage ();
+	      else {
+	         initMessage ();
 	         addBytetoMessage (val);
 	         navtexState = NAVTEX_X3;
 	      }
@@ -474,7 +476,7 @@ void	SDRunoPlugin_navtex::addBytetoMessage (int val) {
 	   return;
 	}
 
-	if (navtexQueue [navtexQP] == NAVTEX_SCRAPPED) {	/* just skip	*/
+	if (navtexQueue [navtexQP] == NAVTEX_SCRAPPED) { /* just skip	*/
 	   navtexQP = (navtexQP + 1) % NAVTEX_DECODERQUEUE;
 	   navtexQueue [(navtexQP + 5) % NAVTEX_DECODERQUEUE] = val;
 	   return;
@@ -667,11 +669,36 @@ void	SDRunoPlugin_navtex::navtex_clrText () {
 void	SDRunoPlugin_navtex::navtex_addText (char c) {
 	if (c <= ' ')
 	   c = ' ';
+	if (dumpFilePointer != nullptr)
+	   fwrite (&c, 1, 1, dumpFilePointer);
 	navtexTextString.push_back (c);
-	if (navtexTextString. size () > 65) {
-		navtexTextString. erase (0, 1);
+	if (navtexTextString. size () > 70) {
+	   navtexTextString. erase (0, 1);
 	}
 	m_form. navtex_showText (navtexTextString);
 }
 
+
+using namespace nana;
+void	SDRunoPlugin_navtex::set_navtexDump	() {
+	if (dumpFilePointer == nullptr) {
+	   nana::filebox fb (0, false);
+	   fb.add_filter ("Text File", "*.text");
+	   fb.add_filter("All Files", "*.*");
+	   auto files = fb();
+	   if (!files. empty ()) {
+	      dumpFilePointer =
+	             fopen (files. front (). string (). c_str (), "w");
+	      if (dumpFilePointer == nullptr) 
+	         m_form. navtex_showText ("file open failed");
+	      else 
+	         m_form. navtex_showDumpLabel ("dumping");
+	   }
+	}
+	else {
+	   fclose (dumpFilePointer);
+	   dumpFilePointer = nullptr;
+	   m_form. navtex_showDumpLabel ("dump");
+	}
+}
 

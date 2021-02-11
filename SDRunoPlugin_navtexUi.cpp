@@ -106,15 +106,26 @@ void	SDRunoPlugin_navtexUi::set_navtexAfcon		(const std::string &s){
 	m_parent. set_navtexAfcon (s);
 }
 
-void	SDRunoPlugin_navtexUi::set_navtexReverse		(const std::string &s) {
+void	SDRunoPlugin_navtexUi::set_navtexReverse	(const std::string &s) {
 	m_parent. set_navtexReverse (s);
 }
 
-void	SDRunoPlugin_navtexUi::set_navtexFecError		(const std::string &s) {
+void	SDRunoPlugin_navtexUi::set_navtexFecError	(const std::string &s) {
 	m_parent. set_navtexFecError (s);
 }
 
-void    SDRunoPlugin_navtexUi::set_navtexMessage(const std::string& s) {
+void    SDRunoPlugin_navtexUi::set_navtexMessage	(const std::string& s) {
 	m_parent.set_navtexMessage(s);
 }
+
+void	SDRunoPlugin_navtexUi::set_navtexDump		() {
+	m_parent. set_navtexDump ();
+}
+
+void	SDRunoPlugin_navtexUi::navtex_showDumpLabel	(const std::string s) {
+	std::lock_guard<std::mutex> l (m_lock);
+        if (m_form != nullptr)
+           m_form -> navtex_showDumpLabel (s);
+}
+
 

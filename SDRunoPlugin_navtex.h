@@ -21,6 +21,7 @@
 #include	"utilities.h"
 #include	"decimator.h"
 #include	"up-filter.h"
+#include	<stdio.h>
 
 #define NAVTEX_DECODERQUEUE      10
 typedef struct char_map {
@@ -38,18 +39,22 @@ public:
 		SDRunoPlugin_navtex	(IUnoPluginController& controller);
 	virtual ~SDRunoPlugin_navtex	();
 
-	// TODO: change the plugin title here
 virtual
 	const char* GetPluginName() const override { return "SDRuno navtex Plugin"; }
 
 	// IUnoPlugin
 virtual
 	void	HandleEvent (const UnoEvent& ev) override;
+//
+//	coming from the GUI
 	void			set_navtexAfcon		(const std::string&);
 	void			set_navtexReverse	(const std::string&);
 	void			set_navtexFecError	(const std::string&);
 	void			set_navtexMessage	(const std::string&);
+	void			set_navtexDump		();
 
+//
+//	setting data on the GUI
 	void			navtex_showStrength	(float f);
 	void			navtex_showCorrection	(float f);
 	void			navtex_clrText		();
@@ -68,18 +73,19 @@ private:
 	decimator		theDecimator;
 	navtexShifter		localShifter;
 	LowPassFIR	        LPM_Filter;
-	cwAverage		navtexFilter;
+	Average			navtexFilter;
 	RingBuffer<float> navtexAudioBuffer;
 	std::vector<std::complex<float>> navtexToneBuffer;
 	int			navtexTonePhase;
 	upFilter		*audioFilter;
-	int          navtexAudioRate;
-	int	         navtexSourceRate;
+	int	                navtexAudioRate;
+	int	                navtexSourceRate;
 	bool         navtexError;
 
 	std::string		navtexTextstring;
 	std::atomic<bool> 	running;
 
+	FILE			*dumpFilePointer;
 	int			selectedFrequency;
 	int			centerFrequency;
 	void	                StreamProcessorProcess (channel_t    channel,

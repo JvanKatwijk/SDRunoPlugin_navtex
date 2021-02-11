@@ -4,20 +4,20 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of the SDRuno cw decoder
+ *    This file is part of the SDRuno navtex decoder
  *
- *    cw decoder is free software; you can redistribute it and/or modify
+ *    navtex decoder is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    cw decoder is distributed in the hope that it will be useful,
+ *    navtex decoder is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with cw decoder; if not, write to the Free Software
+ *    along with navtex decoder; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
@@ -38,7 +38,7 @@ float	clamp (float X, float Min, float Max) {
 	return X;
 }
 
-	cwAverage::cwAverage (int16_t s):
+	Average::Average (int16_t s):
 	                         vec (s) {
 	size	= s;
 	filp	= 0;
@@ -46,10 +46,10 @@ float	clamp (float X, float Min, float Max) {
 	   vec [i] = 0;
 }
 
-	cwAverage::~cwAverage () {
+	Average::~Average () {
 }
 
-float	cwAverage::filter (float e) {
+float	Average::filter (float e) {
 float	out	= 0.0;
 
 	vec [filp] = e;
@@ -61,7 +61,7 @@ float	out	= 0.0;
 	return out / size;
 }
 
-void	cwAverage::clear (float c ) {
+void	Average::clear (float c ) {
 int16_t	i;
 
 	for (i = 0; i < size; i ++)

@@ -316,6 +316,9 @@ void	SDRunoPlugin_navtexForm::Setup() {
 	navtexCorrection. tooltip ("correction on the selected frequency, when afc is on");
         navtexTextBox . transparent (true);
 	navtexTextBox. fgcolor (nana::colors::white);
+
+	navtexDump. caption ("file");
+	navtexDump.events().click([&]() {set_navtexDump ();});
 }
 
 void SDRunoPlugin_navtexForm::SettingsButton_Click () {
@@ -348,6 +351,14 @@ void	SDRunoPlugin_navtexForm::set_navtexFecError	(const std::string &s) {
 
 void	SDRunoPlugin_navtexForm::set_navtexMessage	(const std::string &s) {
 	m_parent. set_navtexMessage (s);
+}
+
+void	SDRunoPlugin_navtexForm::set_navtexDump		() {
+	m_parent. set_navtexDump ();
+}
+
+void	SDRunoPlugin_navtexForm::navtex_showDumpLabel	(const std::string &s) {
+	navtexDump. caption (s);
 }
 
 

@@ -19,7 +19,7 @@ class SDRunoPlugin_navtexUi {
 public:
 
 		SDRunoPlugin_navtexUi (SDRunoPlugin_navtex& parent,
-	                              IUnoPluginController& controller);
+	                               IUnoPluginController& controller);
 		~SDRunoPlugin_navtexUi ();
 
 	void	HandleEvent	(const UnoEvent& evt);
@@ -27,25 +27,25 @@ public:
 	void	ShowUi		();
 	int	LoadX		();
 	int	LoadY		();
-
+//
+//	going down
         void    navtex_showStrength      (float);
         void    navtex_showCorrection    (float);
         void    navtex_showText          (const std::string &);
-
+	void	navtex_showDumpLabel	(const std::string);
+//
+//	going up
         void    set_navtexAfcon          (const std::string &);
         void    set_navtexReverse        (const std::string &);
         void    set_navtexFecError       (const std::string &);
         void    set_navtexMessage        (const std::string &);
-
+	void	set_navtexDump		();
 private:
 	
 	SDRunoPlugin_navtex & m_parent;
 	std::thread m_thread;
 	std::shared_ptr<SDRunoPlugin_navtexForm> m_form;
-
 	bool m_started;
-
 	std::mutex m_lock;
-
 	IUnoPluginController & m_controller;
 };

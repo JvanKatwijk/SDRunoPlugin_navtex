@@ -32,17 +32,19 @@ class SDRunoPlugin_navtexForm : public nana::form {
 public:
 
 		SDRunoPlugin_navtexForm (SDRunoPlugin_navtexUi& parent,
-	                               IUnoPluginController& controller);		
+	                                 IUnoPluginController& controller);		
 		~SDRunoPlugin_navtexForm ();
 	
 	void    navtex_showStrength     (float);
         void    navtex_showCorrection   (float);
         void    navtex_showText         (const std::string &);
+	void	navtex_showDumpLabel	(const std::string &);
 
         void    set_navtexAfcon         (const std::string &);
         void    set_navtexReverse       (const std::string &);
         void    set_navtexFecError      (const std::string &);
         void    set_navtexMessage       (const std::string &);
+	void	set_navtexDump		();
 
 	void	Run			();
 
@@ -79,10 +81,11 @@ private:
         nana::label navtexTextBox  {*this, nana::rectangle (30, 140, 450, 20)};
 //
 //	then the selectors
-	nana::combox navtexAfcon {*this, nana::rectangle (30, 50, 90, 20) };
-        nana::combox navtexReverse {*this, nana::rectangle (130, 50, 90, 20) };
-        nana::combox navtexFecError {*this, nana::rectangle (230, 50, 90, 20) };
-        nana::combox navtexMessage {*this, nana::rectangle (330, 50, 90, 20) };
+	nana::combox navtexAfcon {*this, nana::rectangle (30, 50, 85, 20) };
+        nana::combox navtexReverse {*this, nana::rectangle (125, 50, 85, 20) };
+        nana::combox navtexFecError {*this, nana::rectangle (220, 50, 85, 20) };
+        nana::combox navtexMessage {*this, nana::rectangle (315, 50, 85, 20) };
+	nana::button navtexDump   {*this, nana::rectangle (410, 50, 60, 20) };
 
 	SDRunoPlugin_navtexUi	& m_parent;
 	IUnoPluginController	& m_controller;
