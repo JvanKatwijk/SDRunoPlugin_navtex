@@ -14,10 +14,43 @@ The transmissions are layered on top of SITOR collective B-mode. SITOR-B is a fo
 
 The NavTex plugin can be used to receive and decode these messages,
 the plugin will set tuning to 518KHz, the standard frequency for 
-navtex messages.
+navtex messages (Another frequency for navtex messages is 490 KHz.)
 
-Another frequency for navtex messages is 490 KHz.
+-------------------------------------------------------------------------
+Using the plugin
+-------------------------------------------------------------------------
 
+![overview](/navtex-plugin.png?raw=true)
+
+First of all, ensure that:
+
+ * In the main control of SDRuno, the samplerate is set to 2000000, with a decimation of 32.
+
+ * Selectin the widget for RX control AM (that will set the Audio output rate to the right value)
+
+ * Select the frequency 518KHz
+
+If/when therre is a transmission, this shows on the main spectrum display
+
+Now please realize that the signal is a PSK signal with a shift (difference
+b etwen mark and space) of only 170 Hz, 170 Hz on a display with a width of
+62.5KHz is hard to identify. Happily enough, the tuning of the SDRplays (at least the versions I have) is precise!
+
+Nevertheless, it is recommended to enlarge the auxiliary spectrum display - as
+shown in the picture - and ensure that the signal is centered around zero.
+
+SWith the default settings on the plugin, data will be shown, but in absence
+of the signal, probably garbage.
+
+The plugin as 5 controls
+
+ * a combobox for switching the AFC on/off
+   If the afc is switched on, the computed offset is shown in the right one of
+the two numeric displays,
+
+ * a combobox for switching mark and space in the decoding,
+
+ * a combobox for 
 The plugin shows - next to a label for the received text - a few
 number displays, some comboboxes and a dump button.
 
