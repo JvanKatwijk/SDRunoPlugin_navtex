@@ -2,7 +2,30 @@
 Simple navtex decoder plugin
 -----------------------------------------------------------------
 
+The navtex plugin for SDRuno is - as the name suggests - a plugin for
+decoding navtext signals transmitted on shortwave.
+
 ![overview](/navtex-example.png?raw=true)
+
+-----------------------------------------------------------------------------
+  READ THIS FIRST installing the plugin
+-----------------------------------------------------------------------------
+
+Since the navtex signals are small band signal (100 Hz in this plugin),
+the samplerate used as input for the plugin is *62500* samples/second.
+
+**On the main widget select samplerate 2000000, and decimation factor 32**.
+
+![overview](/drm-main-widget.png?raw=true)
+
+The plugin itself can be stored in the folder for community plugins
+
+The plugin is - as other plugins - developed under MSVC. Its functioning
+depends on lots of other "dll's" (Dynamic Load Libraries);
+
+If a 0x000012f error is encountered on trying to load the plugin,
+it means that dll's from the Visual C++ Redistributable(VS 2015) are
+not found.
 
 -----------------------------------------------------------------------
 Navtex

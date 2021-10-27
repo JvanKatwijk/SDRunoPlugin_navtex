@@ -133,6 +133,7 @@ void	SDRunoPlugin_navtexForm::Setup() {
 	bmInfo_min.bmiHeader.biCompression = BI_RGB;
 	bmInfo_min_over.bmiHeader.biCompression = BI_RGB;
 	bmInfo_bar.bmiHeader.biCompression = BI_RGB;
+	bmInfo_sett.bmiHeader.biCompression = BI_RGB;
 	bmInfo_sett_over.bmiHeader.biCompression = BI_RGB;
 	borderHeader.bfOffBits = rawDataOffset;
 	borderHeader.bfSize = bmInfo_border.bmiHeader.biSizeImage;
@@ -319,6 +320,17 @@ void	SDRunoPlugin_navtexForm::Setup() {
 
 	navtexDump. caption ("file");
 	navtexDump.events().click([&]() {set_navtexDump ();});
+
+	delete[] borderPixels;
+	delete[] innerPixels;
+	delete[] closePixels;
+	delete[] closeoverPixels;
+	delete[] minPixels;
+	delete[] minoverPixels;
+	delete[] barPixels;
+	delete[] barfocusedPixels;
+	delete[] settPixels;
+	delete[] settoverPixels;
 }
 
 void SDRunoPlugin_navtexForm::SettingsButton_Click () {
