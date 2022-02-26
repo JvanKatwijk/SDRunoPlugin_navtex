@@ -24,7 +24,6 @@
 
 // Form deconstructor
 	SDRunoPlugin_navtexForm::~SDRunoPlugin_navtexForm () {
-
 }
 
 // Start Form and start Nana UI processing
@@ -309,6 +308,10 @@ void	SDRunoPlugin_navtexForm::Setup() {
 	navtexMessage. tooltip ("if message is selected ONLY valid navtex messages will be shown");
 //
 //	coloring the labels
+	copyRightLabel. transparent (true);
+	copyRightLabel. fgcolor (nana::colors::white);
+	copyRightLabel. caption ("\xa9");
+	copyRightLabel. tooltip ("Created by Jan van Katwwijk, all rights reserved\n");
         navtexStrength. transparent (true);
 	navtexStrength. fgcolor (nana::colors::white);
 	navtexStrength. tooltip ("strength of the signal");

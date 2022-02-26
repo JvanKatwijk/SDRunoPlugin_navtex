@@ -67,9 +67,7 @@ CharMap CCIR_476_ITA4 [34] = {
 #define	NAVTEX_SCRAPPED	0xFF
 
 #define	NAVTEX_IF		0
-#define	INRATE			62500
-#define	DECIMATOR		5
-#define	INTERM_RATE		12500
+#define	INRATE			192000
 #define	NAVTEX_SHIFT		170
 #define NAVTEX_BAUDRATE		100
 
@@ -82,12 +80,11 @@ CharMap CCIR_476_ITA4 [34] = {
 	                                   m_form (*this, controller),
 	                                   m_worker (nullptr),
 	                                   navtexBuffer (128 * 32768),
-	                                   theMixer (INRATE),
 	                                   passbandFilter (15,
 	                                                   -1500,
 	                                                   1500,
 	                                                   INRATE),
-	                                   theDecimator (DECIMATOR),
+	                                   theDecimator (INRATE / NAVTEX_RATE),
 	                                   LPM_Filter (15,
 	                                               0.5 * NAVTEX_SHIFT +
 	                                                      NAVTEX_BAUDRATE,
@@ -125,32 +122,15 @@ CharMap CCIR_476_ITA4 [34] = {
 	navtexFecError		= false;
 	navtexTextstring	= "";
 
-//	we want to "work" with a rate of 12000, and since we arrive
-//	from IN_RATE we first decimate and filter to 12500 and then
-//	interpolate for the rest
-	for (int i = 0; i < NAVTEX_RATE / 100; i ++) {
-	   float inVal  = float (INTERM_RATE / 100);
-	   mapTable_int [i]     =  int (floor (i * (inVal / (NAVTEX_RATE / 100))));
-	   mapTable_float [i]   = i * (inVal / (NAVTEX_RATE / 100)) - mapTable_int [i];
-	}
-	convIndex       = 0;
-	convBuffer. resize (INTERM_RATE / 100 + 1);
-
 	m_controller    -> RegisterStreamProcessor (0, this);
 	m_controller    -> RegisterAudioProcessor (0, this);
+	m_controller    -> SetDemodulatorType (0,
+                                 IUnoPluginController::DemodulatorIQOUT);
+
 	m_controller	-> SetCenterFrequency (0, 516000.0);
 	m_controller	-> SetVfoFrequency (0, 518000.0);
-	selectedFrequency
-	                = m_controller	-> GetVfoFrequency (0);
-	centerFrequency = m_controller	-> GetCenterFrequency (0);
 	navtexAudioRate =  m_controller -> GetAudioSampleRate (0);
-	navtexSourceRate	= m_controller -> GetSampleRate (0);
 	navtexError	= false;
-	if ((navtexSourceRate != 2000000 / 32) ||
-	    (navtexAudioRate != 48000)) {
-	   navtexError = true;
-	   m_form. navtex_showText ("please set rate to 2000000/32 and audiorate to 48000 before loading this plugin");
-	}
 	navtexTonePhase	= 0;
  	navtexToneBuffer. resize (navtexAudioRate);
 
@@ -182,8 +162,7 @@ void    SDRunoPlugin_navtex::StreamProcessorProcess (channel_t    channel,
 	                                             Complex      *buffer,
 	                                             int          length,
 	                                             bool         &modified) {
-	if (running. load () && !navtexError)
-	   navtexBuffer. putDataIntoBuffer (buffer, length);
+	(void)channel; (void)buffer; (void)length;
 	modified = false;
 }
 
@@ -191,24 +170,26 @@ void    SDRunoPlugin_navtex::AudioProcessorProcess (channel_t channel,
 	                                            float* buffer,
 	                                            int length,
 	                                            bool& modified) {
+//	Handling IQ input, note that SDRuno interchanges I and Q elements
+        if (!modified) {
+           for (int i = 0; i < length; i++) {
+              std::complex<float> sample =
+                           std::complex<float>(buffer [2 * i +  1],
+                                               buffer [2 * i]);
+              sample = passbandFilter.Pass (sample);
+              if (theDecimator.Pass (sample, &sample))
+                 navtexBuffer.putDataIntoBuffer (&sample, 1);
+           }
+        }
 	if (navtexAudioBuffer.GetRingBufferReadAvailable() >= length * 2) {
 	   navtexAudioBuffer.getDataFromBuffer(buffer, length * 2);
-	   modified = true;
 	}
-	else
-	   modified = false;
+	modified = true;
 }
 
 void	SDRunoPlugin_navtex::HandleEvent (const UnoEvent& ev) {
 	switch (ev. GetType ()) {
 	   case UnoEvent::FrequencyChanged:
-	      selectedFrequency =
-	              m_controller ->GetVfoFrequency (ev. GetChannel ());
-	      centerFrequency = m_controller -> GetCenterFrequency(0);
-	      locker. lock ();
-	      passbandFilter.
-	             update (selectedFrequency - centerFrequency, 3000);
-	      locker. unlock ();
 	      break;
 
 	   case UnoEvent::CenterFrequencyChanged:
@@ -233,17 +214,13 @@ Complex buffer [BUFFER_SIZE];
 	      break;
 
 	   navtexBuffer. getDataFromBuffer (buffer, BUFFER_SIZE);
-	   int theOffset = centerFrequency - selectedFrequency;
-	   locker.lock ();
 	   for (int i = 0; i < BUFFER_SIZE; i++) {
 	      std::complex<float> sample =
 	                std::complex<float>(buffer [i]. real, buffer [i]. imag);
 	      sample   = passbandFilter. Pass (sample);
-	      sample   = theMixer. do_shift (sample, -theOffset);
 	      if (theDecimator. Pass (sample, &sample))
-	         process (sample);
+	         processSample (sample);
 	   }  
-	   locker.unlock ();
 	}
 
 	m_form. navtex_showText ("going down");
@@ -253,39 +230,6 @@ Complex buffer [BUFFER_SIZE];
 static inline
 std::complex<float> cmul(std::complex<float> x, float y) {
 	return std::complex<float>(real(x) * y, imag(x) * y);
-}
-//
-//	decimating is from 62500 -> 12500, but the code was
-//	designed for a rate of 12000, so the last transform
-//	is a simple interpolation
-int     SDRunoPlugin_navtex::resample	(std::complex<float> in,
-	                                 std::complex<float> *out) {
-	convBuffer [convIndex ++] = in;
-	if (convIndex >= convBuffer. size ()) {
-	   for (int i = 0; i < NAVTEX_RATE / 100; i ++) {
-	      int16_t  inpBase       = mapTable_int [i];
-	      float    inpRatio      = mapTable_float [i];
-	      out [i]       = cmul (convBuffer [inpBase + 1], inpRatio) +
-	                          cmul (convBuffer [inpBase], 1 - inpRatio);
-	   }
-	   convBuffer [0]       = convBuffer [convBuffer. size () - 1];
-	   convIndex    = 1;
-	   return NAVTEX_RATE / 100;
-	}
-	return -1;
-}
-
-void    SDRunoPlugin_navtex::process (std::complex<float> z) {
-std::complex<float> out [256];	// well, 120 should be enough
-int     cnt;
-
-	cnt = resample (z, out);
-	if (cnt < 0)
-	   return;
-
-	for (int i = 0; i < cnt; i++) {
-	   processSample (out[i]);
-	}
 }
 //
 //	This is where it really starts, we process (decimated) sample
@@ -311,7 +255,7 @@ std::vector<std::complex<float>> tone (navtexAudioRate / NAVTEX_RATE);
 	   tone[i] *= navtexToneBuffer[navtexTonePhase];
 	   navtexTonePhase = (navtexTonePhase + 801) % navtexAudioRate;
 	}
-	navtexAudioBuffer.putDataIntoBuffer(tone.data(), tone.size() * 2);
+	navtexAudioBuffer.putDataIntoBuffer (tone.data(), tone.size() * 2);
 
 	float power = norm (z);
 	navtexStrength = power > 0 ? 20 * log10((power + 0.1) / 2048) : 0;

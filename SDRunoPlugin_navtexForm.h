@@ -78,7 +78,8 @@ private:
 //	first the number displays
 	nana::label navtexStrength {*this, nana::rectangle (30, 110, 100, 20)};
         nana::label navtexCorrection {*this, nana::rectangle (140, 110, 100, 20)};
-        nana::label navtexTextBox  {*this, nana::rectangle (30, 140, 450, 20)};
+        nana::label navtexTextBox  {*this, nana::rectangle (30, 140, 420, 20)};
+        nana::label copyRightLabel {*this, nana::rectangle (460, 140, 20, 20)};
 //
 //	then the selectors
 	nana::combox navtexAfcon {*this, nana::rectangle (30, 50, 85, 20) };

@@ -68,7 +68,6 @@ private:
 	void		        WorkerFunction		();
 	std::thread*	        m_worker;
 	RingBuffer<Complex>     navtexBuffer;
-	navtexShifter		theMixer;
 	bandpassFilter          passbandFilter;
 	decimator		theDecimator;
 	navtexShifter		localShifter;
@@ -80,7 +79,7 @@ private:
 	upFilter		*audioFilter;
 	int	                navtexAudioRate;
 	int	                navtexSourceRate;
-	bool         navtexError;
+	bool			navtexError;
 
 	std::string		navtexTextstring;
 	std::atomic<bool> 	running;
