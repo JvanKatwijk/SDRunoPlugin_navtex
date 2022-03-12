@@ -12,11 +12,13 @@ decoding navtext signals transmitted on shortwave.
 -----------------------------------------------------------------------------
 
 Since the navtex signals are small band signal (100 Hz in this plugin),
-the samplerate used as input for the plugin is *62500* samples/second.
+the samplerate used as input for the plugin is *192000* samples/second.
 
-**On the main widget select samplerate 2000000, and decimation factor 32**.
-
-![overview](/drm-main-widget.png?raw=true)
+The 192000 samplerate is provided by the SDRuno platform, further
+decimation and filtering is dome by the plugin itself.
+Note that on a 2 MHz wide spectrum, it is pretty hard to detect small
+signals, like the navtex one, so use the zooming facility on the
+main spectrum window to show a smaller spectrum.
 
 The plugin itself can be stored in the folder for community plugins
 
@@ -47,20 +49,14 @@ Using the plugin
 
 First of all, ensure that:
 
- * In the main control of SDRuno, the samplerate is set to 2000000, with a decimation of 32.
+ * Select the frequency 518KHz (selecting the plugin will set the frequence
+to that.
 
- * Selectin the widget for RX control AM (that will set the Audio output rate to the right value)
-
- * Select the frequency 518KHz
-
-If/when therre is a transmission, this shows on the main spectrum display
+If/when there is a transmission, this shows on the main spectrum display
 
 Now please realize that the signal is a PSK signal with a shift (difference
 b etwen mark and space) of only 170 Hz, 170 Hz on a display with a width of
 62.5KHz is hard to identify. Happily enough, the tuning of the SDRplays (at least the versions I have) is precise!
-
-Nevertheless, it is recommended to enlarge the auxiliary spectrum display - as
-shown in the picture - and ensure that the signal is centered around zero.
 
 SWith the default settings on the plugin, data will be shown, but in absence
 of the signal, probably garbage.

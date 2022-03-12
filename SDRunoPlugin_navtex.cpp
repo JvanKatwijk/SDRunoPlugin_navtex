@@ -122,7 +122,7 @@ CharMap CCIR_476_ITA4 [34] = {
 	navtexFecError		= false;
 	navtexTextstring	= "";
 
-	m_controller    -> RegisterStreamProcessor (0, this);
+//	m_controller    -> RegisterStreamProcessor (0, this);
 	m_controller    -> RegisterAudioProcessor (0, this);
 	m_controller    -> SetDemodulatorType (0,
                                  IUnoPluginController::DemodulatorIQOUT);
@@ -150,7 +150,7 @@ CharMap CCIR_476_ITA4 [34] = {
 	if (dumpFilePointer != nullptr)
 	   fclose (dumpFilePointer);
 	dumpFilePointer	= nullptr;
-	m_controller    -> UnregisterStreamProcessor (0, this);
+//	m_controller    -> UnregisterStreamProcessor (0, this);
 	m_controller    -> UnregisterAudioProcessor (0, this);
 	delete m_worker;
 	m_worker = nullptr;
