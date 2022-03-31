@@ -29,6 +29,14 @@ If a 0x000012f error is encountered on trying to load the plugin,
 it means that dll's from the Visual C++ Redistributable(VS 2015) are
 not found.
 
+Installing seems to be simple:
+
+How do I fix the api-ms-win-crt-runtime-l1-1-0. dll missing error?
+
+    Install the software via Windows Update.
+    Download Visual C++ Redistributable for Visual Studio 2015 from Microsoft directly.
+    Install or Repair the Visual C++ Redistributable for Visual Studio 2015 on your computer.
+
 -----------------------------------------------------------------------
 Navtex
 -----------------------------------------------------------------------
