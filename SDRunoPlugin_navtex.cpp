@@ -115,11 +115,11 @@ CharMap CCIR_476_ITA4 [34] = {
 	navtex_clrText		();
 	navtex_showCorrection (navtexIF);
 
-	dumpFilePointer		= nullptr;
+	dumpfilePointer		= nullptr;
 	navtexAfcon	        = false;
-	showAlways	        = true;
+	showAlways	        = false;
+	navtexFecError		= true;
 	navtexReversed		= false;;
-	navtexFecError		= false;
 	navtexTextstring	= "";
 
 //	m_controller    -> RegisterStreamProcessor (0, this);
@@ -147,9 +147,9 @@ CharMap CCIR_476_ITA4 [34] = {
 	SDRunoPlugin_navtex::~SDRunoPlugin_navtex () {	
 	running. store (false);
 	m_worker -> join ();
-	if (dumpFilePointer != nullptr)
-	   fclose (dumpFilePointer);
-	dumpFilePointer	= nullptr;
+	if (dumpfilePointer != nullptr)
+	   fclose (dumpfilePointer);
+	dumpfilePointer	= nullptr;
 //	m_controller    -> UnregisterStreamProcessor (0, this);
 	m_controller    -> UnregisterAudioProcessor (0, this);
 	delete m_worker;
@@ -176,15 +176,13 @@ void    SDRunoPlugin_navtex::AudioProcessorProcess (channel_t channel,
               std::complex<float> sample =
                            std::complex<float>(buffer [2 * i +  1],
                                                buffer [2 * i]);
-              sample = passbandFilter.Pass (sample);
-              if (theDecimator.Pass (sample, &sample))
-                 navtexBuffer.putDataIntoBuffer (&sample, 1);
+	      navtexBuffer.putDataIntoBuffer (&sample, 1);
            }
         }
 	if (navtexAudioBuffer.GetRingBufferReadAvailable() >= length * 2) {
 	   navtexAudioBuffer.getDataFromBuffer(buffer, length * 2);
+	   modified = true;
 	}
-	modified = true;
 }
 
 void	SDRunoPlugin_navtex::HandleEvent (const UnoEvent& ev) {
@@ -203,7 +201,7 @@ void	SDRunoPlugin_navtex::HandleEvent (const UnoEvent& ev) {
 
 #define	BUFFER_SIZE	4096
 void	SDRunoPlugin_navtex::WorkerFunction () {
-Complex buffer [BUFFER_SIZE];
+std::complex<float> buffer [BUFFER_SIZE];
 
 	running. store (true);
 	while (true) {
@@ -215,8 +213,7 @@ Complex buffer [BUFFER_SIZE];
 
 	   navtexBuffer. getDataFromBuffer (buffer, BUFFER_SIZE);
 	   for (int i = 0; i < BUFFER_SIZE; i++) {
-	      std::complex<float> sample =
-	                std::complex<float>(buffer [i]. real, buffer [i]. imag);
+		   std::complex<float> sample = buffer[i];
 	      sample   = passbandFilter. Pass (sample);
 	      if (theDecimator. Pass (sample, &sample))
 	         processSample (sample);
@@ -228,7 +225,7 @@ Complex buffer [BUFFER_SIZE];
 }
 
 static inline
-std::complex<float> cmul(std::complex<float> x, float y) {
+std::complex<float> cmul (std::complex<float> x, float y) {
 	return std::complex<float>(real(x) * y, imag(x) * y);
 }
 //
@@ -487,68 +484,105 @@ void	SDRunoPlugin_navtex::navtexText (uint8_t c) {
 //	just wait until we see a "ZCZC" sequence of characters	
 	switch (messageState) {
 	   case NOTHING:
-	      if ((char)c == 'Z') 
+	      if ((char)c == 'Z') {
 	         messageState = STATE_Z;
+	         navtex_showState (messageState);
+	      }
 	      return;
 
 	   case STATE_Z:
-	      if ((char)c == 'C')
+	      if ((char)c == 'C') {
 	         messageState = STATE_ZC;
-	      else
-	         messageState = NOTHING;
+	         navtex_showState (messageState);
+              }
+              else {
+                 messageState = NOTHING;
+                 navtex_showState (messageState);
+              }
 	      return;
 
 	   case STATE_ZC:
-	      if ((char)c == 'Z')
-	         messageState = STATE_ZCZ;
-	      else
-	         messageState = NOTHING;
-	      return;
+	      if ((char)c == 'Z') {
+                 messageState = STATE_ZCZ;
+                 navtex_showState (messageState);
+              }
+              else {
+                 messageState = NOTHING;
+                 navtex_showState (messageState);
+              }
+              return;
 
 	   case STATE_ZCZ:
 	      if ((char)c == 'C') {
 	         messageState = STATE_ZCZC;
+                 navtexTextString. clear ();
+                 navtex_showState (messageState);
 	         navtex_addText ((char)'Z');
 	         navtex_addText ((char)'C');
 	         navtex_addText ((char)'Z');
 	         navtex_addText ((char)'C');
 	      }
-	      else
+	      else {
 	         messageState = NOTHING;
+	         navtex_showState (messageState);
+              }
+
 	      return;
 
 	   case STATE_ZCZC:
-	      if ((char)c == 'N')
+	      if ((char)c == 'N') {
 	         messageState = STATE_N;
+	         navtex_showState (messageState);
+	      }
 	      navtex_addText ((char)c);
 	      return;
 
 	   case STATE_N:
-	      if ((char)c == 'N')
-	         messageState = STATE_NN;
-	      else
-	         messageState = STATE_ZCZC;
-	      navtex_addText ((char)c);
-	      return;
+	      if ((char)c == 'N') {
+                 messageState = STATE_NN;
+                 navtex_showState (messageState);
+              }
+              else {
+                 messageState = STATE_ZCZC;
+                 navtex_showState (messageState);
+              }
+              navtex_addText ((char)c);
+              return;
 
 	   case STATE_NN:
-	      if ((char)c == 'N')
-	         messageState = STATE_NNN;
-	      else
-	         messageState = STATE_ZCZC;
-	      navtex_addText ((char)c);
-	      return;
+	      if ((char)c == 'N') {
+                 messageState = STATE_NNN;
+                 navtex_showState (messageState);
+              }
+              else {
+                 messageState = STATE_ZCZC;
+                 navtex_showState (messageState);
+              }
+              navtex_addText ((char)c);
+              return;
+
 
 	   case STATE_NNN:
-	      if ((char)c == 'N')
-	         messageState = STATE_NNNN;
-	      else
-	         messageState = STATE_ZCZC;
-	      navtex_addText ((char)c);
-	      return;
+	      if ((char)c == 'N') {
+                 if (dumpfilePointer != nullptr)
+                    saveMessage (navtexTextString);
+                 messageState = STATE_NNNN;
+                 navtex_showState (messageState);
+              }
+              else
+              if ((char)c == ' ')
+                 return;
+              else {
+                 messageState = STATE_ZCZC;
+                 navtex_showState (messageState);
+              }
+              navtex_addText ((char)c);
+              return;
+
 
 	   case STATE_NNNN:
 	      messageState = NOTHING;
+	      navtex_showState (messageState);
 	      navtex_addText ((char)c);
 	      return;
 	}
@@ -609,40 +643,80 @@ void	SDRunoPlugin_navtex::navtex_clrText () {
 	m_form. navtex_showText ("cleared string");
 }
 
+void    SDRunoPlugin_navtex::set_clearButton    () {
+        navtexTextString. clear ();
+        messageState    = NOTHING;
+        navtex_showState (messageState);
+        m_form. navtex_showText ("");
+}
 
 void	SDRunoPlugin_navtex::navtex_addText (char c) {
-	if (c <= ' ')
-	   c = ' ';
-	if (dumpFilePointer != nullptr)
-	   fwrite (&c, 1, 1, dumpFilePointer);
-	navtexTextString.push_back (c);
-	if (navtexTextString. size () > 70) {
-	   navtexTextString. erase (0, 1);
-	}
+	navtexTextstring. push_back (c);
 	m_form. navtex_showText (navtexTextString);
 }
 
-
 using namespace nana;
 void	SDRunoPlugin_navtex::set_navtexDump	() {
-	if (dumpFilePointer == nullptr) {
+	if (dumpfilePointer == nullptr) {
 	   nana::filebox fb (0, false);
 	   fb.add_filter ("Text File", "*.text");
 	   fb.add_filter("All Files", "*.*");
 	   auto files = fb();
 	   if (!files. empty ()) {
-	      dumpFilePointer =
+	      dumpfilePointer =
 	             fopen (files. front (). string (). c_str (), "w");
-	      if (dumpFilePointer == nullptr) 
+	      if (dumpfilePointer == nullptr) 
 	         m_form. navtex_showText ("file open failed");
 	      else 
 	         m_form. navtex_showDumpLabel ("dumping");
 	   }
 	}
 	else {
-	   fclose (dumpFilePointer);
-	   dumpFilePointer = nullptr;
+	   fclose (dumpfilePointer);
+	   dumpfilePointer = nullptr;
 	   m_form. navtex_showDumpLabel ("dump");
 	}
+}
+
+void	SDRunoPlugin_navtex::navtex_showState (int n) {
+std::string res;
+
+	switch (n) {
+	   case NOTHING:
+	      res	= "no valid data";
+	      break;
+	   case STATE_Z:
+	      res	= "checking";
+	      break;
+	   case STATE_ZC:
+	      res	= "checking";
+	      break;
+	   case STATE_ZCZ:
+	      res 	= "checking";
+	      break;
+	   case STATE_ZCZC:
+	      res	= "decoding";
+	      break;
+	   case STATE_N:
+	      res	= "decoding";
+	      break;
+	   case STATE_NN:
+	      res	= "decoding";
+	      break;
+	   case STATE_NNN:
+	      res	= "decoding";
+	      break;
+	   case STATE_NNNN:
+	      res	= "message end";
+	      break;
+	   default:
+	      res	= "no idea";
+	      break;
+	}
+	m_form. navtex_showState (res);
+}
+
+void	SDRunoPlugin_navtex::saveMessage (const std::string &s) {
+	fwrite (s. c_str (), s. size (), 1, dumpfilePointer);
 }
 

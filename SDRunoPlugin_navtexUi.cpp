@@ -87,19 +87,25 @@ void	SDRunoPlugin_navtexUi::FormClosed () {
 
 void	SDRunoPlugin_navtexUi::navtex_showStrength	(float f) {
 	std::lock_guard<std::mutex> l (m_lock);
-        if (m_form != nullptr)
+	if (m_form != nullptr)
 	   m_form -> navtex_showStrength (f);
 }
 
 void	SDRunoPlugin_navtexUi::navtex_showCorrection	(float f) {
 	std::lock_guard<std::mutex> l (m_lock);
-        if (m_form != nullptr)
+	if (m_form != nullptr)
 	   m_form -> navtex_showCorrection (f);
 }
 void    SDRunoPlugin_navtexUi::navtex_showText(const std::string&s) {
 	std::lock_guard<std::mutex> l (m_lock);
-        if (m_form != nullptr)
+	if (m_form != nullptr)
 	   m_form -> navtex_showText (s);
+}
+
+void    SDRunoPlugin_navtexUi::navtex_showState         (const std::string &s) {
+        std::lock_guard<std::mutex> l (m_lock);
+        if (m_form != nullptr)
+           m_form -> navtex_showState (s);
 }
 
 void	SDRunoPlugin_navtexUi::set_navtexAfcon		(const std::string &s){
@@ -124,8 +130,11 @@ void	SDRunoPlugin_navtexUi::set_navtexDump		() {
 
 void	SDRunoPlugin_navtexUi::navtex_showDumpLabel	(const std::string s) {
 	std::lock_guard<std::mutex> l (m_lock);
-        if (m_form != nullptr)
-           m_form -> navtex_showDumpLabel (s);
+	if (m_form != nullptr)
+	   m_form -> navtex_showDumpLabel (s);
 }
 
+void    SDRunoPlugin_navtexUi::set_clearButton          () {
+	m_parent. set_clearButton ();
+}
 

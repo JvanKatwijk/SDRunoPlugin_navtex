@@ -5,7 +5,7 @@ Simple navtex decoder plugin
 The navtex plugin for SDRuno is - as the name suggests - a plugin for
 decoding navtext signals transmitted on shortwave.
 
-![overview](/navtex-example.png?raw=true)
+![overview](/navtex-plugin-widget.png?raw=true)
 
 -----------------------------------------------------------------------------
   READ THIS FIRST installing the plugin

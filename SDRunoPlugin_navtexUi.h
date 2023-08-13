@@ -33,6 +33,7 @@ public:
         void    navtex_showCorrection    (float);
         void    navtex_showText          (const std::string &);
 	void	navtex_showDumpLabel	(const std::string);
+	void    navtex_showState        (const std::string &);
 //
 //	going up
         void    set_navtexAfcon          (const std::string &);
@@ -40,6 +41,7 @@ public:
         void    set_navtexFecError       (const std::string &);
         void    set_navtexMessage        (const std::string &);
 	void	set_navtexDump		();
+	void	set_clearButton         ();
 private:
 	
 	SDRunoPlugin_navtex & m_parent;

@@ -29,7 +29,17 @@ typedef struct char_map {
 	char    digit;
 	int     key;
 } CharMap;
+
 #define	NAVTEX_RATE	12000
+#define NOTHING         0
+#define STATE_Z         1
+#define STATE_ZC        2
+#define STATE_ZCZ       3
+#define STATE_ZCZC      4
+#define STATE_N         5
+#define STATE_NN        6
+#define STATE_NNN       7
+#define STATE_NNNN      8
 
 class SDRunoPlugin_navtex : public IUnoPlugin,
 	                          public IUnoStreamProcessor,
@@ -52,6 +62,7 @@ virtual
 	void			set_navtexFecError	(const std::string&);
 	void			set_navtexMessage	(const std::string&);
 	void			set_navtexDump		();
+	void			set_clearButton		();
 
 //
 //	setting data on the GUI
@@ -59,7 +70,7 @@ virtual
 	void			navtex_showCorrection	(float f);
 	void			navtex_clrText		();
 	void			navtex_addText		(char c);
-	void			navtex_showText		(const std::string&);
+	void			navtex_showText		(const std::string &);
 private:
 	std::mutex	        m_lock;
 	SDRunoPlugin_navtexUi	m_form;
@@ -84,7 +95,7 @@ private:
 	std::string		navtexTextstring;
 	std::atomic<bool> 	running;
 
-	FILE			*dumpFilePointer;
+	FILE			*dumpfilePointer;
 	int			selectedFrequency;
 	int			centerFrequency;
 	void	                StreamProcessorProcess (channel_t    channel,
@@ -114,7 +125,8 @@ private:
 	void			flushBuffer		(void);
 	void			HandleChar		(int16_t);
 	void			navtexText		(uint8_t c);
-
+	void			navtex_showState	(int);
+	void			saveMessage		(const std::string &);
 	std::string		navtexTextString;
 	int16_t			CycleCount;
 	float			navtexIF;
@@ -138,17 +150,4 @@ private:
 	bool			navtexFecError;
 	bool			showAlways;
 	int16_t			messageState;
-
-	enum messageMode {
-	   NOTHING,
-	   STATE_Z,
-	   STATE_ZC,
-	   STATE_ZCZ,
-	   STATE_ZCZC,
-	   STATE_N,
-	   STATE_NN,
-	   STATE_NNN,
-	   STATE_NNNN
-	};
-
 };

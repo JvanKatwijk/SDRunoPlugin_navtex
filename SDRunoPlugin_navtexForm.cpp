@@ -295,14 +295,14 @@ void	SDRunoPlugin_navtexForm::Setup() {
 
 	navtexFecError. push_back ("non strict");
 	navtexFecError. push_back ("strict fec");
-	navtexFecError. option (0);
+	navtexFecError. option (1);
 	navtexFecError. events (). selected ([&](const nana::arg_combox &ar_cbx)
                             {set_navtexFecError (ar_cbx. widget. caption ());});
 	navtexFecError. tooltip ("error correction setting, useful for seeing whether or not data is passing by");
 
 	navtexMessage.push_back("all text");
 	navtexMessage. push_back ("message");
-	navtexMessage. option (0);
+	navtexMessage. option (1);
 	navtexMessage. events (). selected ([&](const nana::arg_combox &ar_cbx)
                             {set_navtexMessage (ar_cbx. widget. caption ());});
 	navtexMessage. tooltip ("if message is selected ONLY valid navtex messages will be shown");
@@ -323,6 +323,9 @@ void	SDRunoPlugin_navtexForm::Setup() {
 
 	navtexDump. caption ("file");
 	navtexDump.events().click([&]() {set_navtexDump ();});
+
+	clearButton. caption ("clear");
+        clearButton. events (). click ([&] () {set_clearButton ();});
 
 	delete[] borderPixels;
 	delete[] innerPixels;
@@ -376,4 +379,11 @@ void	SDRunoPlugin_navtexForm::navtex_showDumpLabel	(const std::string &s) {
 	navtexDump. caption (s);
 }
 
+void    SDRunoPlugin_navtexForm::set_clearButton        () {
+        m_parent. set_clearButton ();
+}
+
+void    SDRunoPlugin_navtexForm::navtex_showState       (const std::string &s) {
+        navtexState. caption (s);
+}
 

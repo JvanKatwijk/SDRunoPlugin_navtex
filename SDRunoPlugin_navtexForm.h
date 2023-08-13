@@ -24,7 +24,7 @@
 // TODO: Change these numbers to the height and width of your form
 //#define formWidth (297)
 #define formWidth (500)
-#define formHeight (240)
+#define formHeight (400)
 
 class SDRunoPlugin_navtexUi;
 
@@ -39,13 +39,13 @@ public:
         void    navtex_showCorrection   (float);
         void    navtex_showText         (const std::string &);
 	void	navtex_showDumpLabel	(const std::string &);
-
+	void	navtex_showState	(const std::string &);
         void    set_navtexAfcon         (const std::string &);
         void    set_navtexReverse       (const std::string &);
         void    set_navtexFecError      (const std::string &);
         void    set_navtexMessage       (const std::string &);
 	void	set_navtexDump		();
-
+	void	set_clearButton		();
 	void	Run			();
 
 private:
@@ -78,7 +78,7 @@ private:
 //	first the number displays
 	nana::label navtexStrength {*this, nana::rectangle (30, 110, 100, 20)};
         nana::label navtexCorrection {*this, nana::rectangle (140, 110, 100, 20)};
-        nana::label navtexTextBox  {*this, nana::rectangle (30, 140, 420, 20)};
+	nana::label navtexState   {*this, nana::rectangle(250, 110, 100, 20) };  
         nana::label copyRightLabel {*this, nana::rectangle (460, 140, 20, 20)};
 //
 //	then the selectors
@@ -87,6 +87,11 @@ private:
         nana::combox navtexFecError {*this, nana::rectangle (220, 50, 85, 20) };
         nana::combox navtexMessage {*this, nana::rectangle (315, 50, 85, 20) };
 	nana::button navtexDump   {*this, nana::rectangle (410, 50, 60, 20) };
+	nana::button clearButton  {*this, nana::rectangle (30, 80, 60, 20) };
+//
+//	and the text segment
+	nana::label navtexTextBox  {*this, nana::rectangle (30, 140, 420, 200)};
+        std::list<std::string> displayList;
 
 	SDRunoPlugin_navtexUi	& m_parent;
 	IUnoPluginController	& m_controller;
